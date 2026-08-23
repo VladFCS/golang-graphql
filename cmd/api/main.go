@@ -12,9 +12,9 @@ import (
 
 	"github.com/vladfc/ghira/internal/graphql"
 	"github.com/vladfc/ghira/internal/graphql/resolver"
+	"github.com/vladfc/ghira/internal/user"
 
 	"github.com/vladfc/ghira/internal/config"
-	"github.com/vladfc/ghira/internal/database"
 	"github.com/vladfc/ghira/internal/server"
 )
 
@@ -39,13 +39,47 @@ func run() error {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
-	db, err := database.Open(ctx, cfg.Database)
-	if err != nil {
-		return err
-	}
-	defer db.Close()
+	// db, err := database.Open(ctx, cfg.Database)
+	// if err != nil {
+	// 	return err
+	// }
+	// defer db.Close()
 
-	graphqlHandler := graphql.NewHandler(&resolver.Resolver{})
+	now := time.Now().UTC()
+
+	seedUsers := []user.User{
+		{
+			ID:           "8b7d8a0a-6c7e-4bb2-bb6a-68c73a4b6b01",
+			Email:        "olena.koval@example.com",
+			Username:     "olena",
+			PasswordHash: "seed_password_hash_1",
+			CreatedAt:    now,
+			UpdatedAt:    now,
+		},
+		{
+			ID:           "1c4a3df7-4a5d-41c5-8708-3a8a94f52c21",
+			Email:        "maksym.shevchenko@example.com",
+			Username:     "maksym",
+			PasswordHash: "seed_password_hash_2",
+			CreatedAt:    now,
+			UpdatedAt:    now,
+		},
+		{
+			ID:           "bfa5ef65-7401-47dd-b96e-c0d16f91e5a4",
+			Email:        "daria.melnyk@example.com",
+			Username:     "daria",
+			PasswordHash: "seed_password_hash_3",
+			CreatedAt:    now,
+			UpdatedAt:    now,
+		},
+	}
+
+	userRepo := user.NewMemoryRepository(seedUsers)
+	userService := user.NewService(userRepo)
+
+	graphqlHandler := graphql.NewHandler(&resolver.Resolver{
+		UserService: userService,
+	})
 	srv := server.New(cfg.HTTP, logger, graphqlHandler)
 
 	errCh := make(chan error, 1)
