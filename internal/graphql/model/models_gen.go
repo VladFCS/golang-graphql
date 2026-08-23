@@ -2,9 +2,21 @@
 
 package model
 
+import (
+	"time"
+)
+
 type Health struct {
 	Status string `json:"status"`
 }
 
 type Query struct {
+}
+
+type User struct {
+	ID        string    `json:"id"`
+	Email     string    `json:"email"`
+	Username  string    `json:"username"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
 }
