@@ -33,6 +33,7 @@ When the user explicitly asks to implement or create project files, produce prod
 Use:
 
 - Go
+- `net/http` for HTTP servers, handlers, middleware, and small HTTP services where it fits
 - GraphQL with gqlgen
 - PostgreSQL
 - JWT authentication
@@ -40,6 +41,8 @@ Use:
 - WebSockets for GraphQL subscriptions
 
 Prefer standard Go libraries where practical. Do not add frameworks or infrastructure unless there is a clear architectural reason.
+
+Prefer `net/http` as the default HTTP foundation for this project and for any future small service or microservice work. Do not introduce Gin, Echo, Fiber, chi, or another HTTP framework by default; use one only when the user explicitly asks for it or when a concrete project requirement makes the tradeoff worthwhile.
 
 ## Architecture
 
@@ -322,6 +325,7 @@ Recommended progression:
 - Keep DataLoader caching request-scoped.
 - Perform filtering and pagination in the database.
 - Prefer simple explicit Go code over unnecessary abstractions.
+- Prefer `net/http` for HTTP and microservice boundaries unless there is a clear reason to use another router/framework.
 - Keep dependencies pointing toward business logic rather than transport infrastructure.
 - Write code that can be tested without starting the entire application.
 
