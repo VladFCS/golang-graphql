@@ -10,8 +10,11 @@ import (
 	"syscall"
 	"time"
 
+	graphql "command-line-arguments/Users/vlad/MySpace/Code/golang/golang-graphql/internal/graphql/handler.go"
+
 	"github.com/vladfc/ghira/internal/config"
 	"github.com/vladfc/ghira/internal/database"
+	"github.com/vladfc/ghira/internal/graphql/resolver"
 	"github.com/vladfc/ghira/internal/server"
 )
 
@@ -42,7 +45,8 @@ func run() error {
 	}
 	defer db.Close()
 
-	srv := server.New(cfg.HTTP, logger)
+	graphqlHandler := graphql.NewHandler(&resolver.Resolver{})
+	srv := server.New(cfg.HTTP, logger, graphqlHandler)
 
 	errCh := make(chan error, 1)
 	go func() {

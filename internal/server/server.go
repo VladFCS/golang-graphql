@@ -9,10 +9,11 @@ import (
 	"github.com/vladfc/ghira/internal/config"
 )
 
-func New(cfg config.HTTPConfig, logger *slog.Logger) *http.Server {
+func New(cfg config.HTTPConfig, logger *slog.Logger, graphqlHandler http.Handler) *http.Server {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", healthHandler)
 
+	mux.Handle("POST /query", graphqlHandler)
 	handler := recoverer(logger)(requestLogger(logger)(mux))
 
 	return &http.Server{
