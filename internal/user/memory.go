@@ -2,11 +2,8 @@ package user
 
 import (
 	"context"
-	"errors"
 	"sync"
 )
-
-var ErrNotFound = errors.New("user not found")
 
 type MemoryRepository struct {
 	users []User
@@ -17,6 +14,16 @@ func NewMemoryRepository(users []User) *MemoryRepository {
 	return &MemoryRepository{
 		users: append([]User(nil), users...),
 	}
+}
+
+func (m *MemoryRepository) Create(_ context.Context, user User) (*User, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	m.users = append(m.users, user)
+
+	createdUser := user
+	return &createdUser, nil
 }
 
 func (m *MemoryRepository) List(_ context.Context) ([]User, error) {

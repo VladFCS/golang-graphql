@@ -8,6 +8,11 @@ import (
 )
 
 type mockRepository struct {
+	createCalled bool
+	createUser   User
+	createResult *User
+	createErr    error
+
 	listCalled bool
 	listResult []User
 	listErr    error
@@ -16,6 +21,12 @@ type mockRepository struct {
 	findID     string
 	findResult *User
 	findErr    error
+}
+
+func (r *mockRepository) Create(ctx context.Context, user User) (*User, error) {
+	r.createCalled = true
+	r.createUser = user
+	return r.createResult, r.createErr
 }
 
 func (r *mockRepository) List(ctx context.Context) ([]User, error) {
