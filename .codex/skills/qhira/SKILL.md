@@ -328,6 +328,7 @@ Recommended progression:
 - Prefer `net/http` for HTTP and microservice boundaries unless there is a clear reason to use another router/framework.
 - Keep dependencies pointing toward business logic rather than transport infrastructure.
 - Write code that can be tested without starting the entire application.
+- Never build the application as a verification step. Do not run `go build`, `make build`, Docker image builds, or similar app-build commands for this project; use `go test ./...`, generators, migrations/status checks, targeted runs, and health checks instead.
 
 When requirements are ambiguous, choose the simplest production-reasonable solution, keep the architecture extensible, avoid speculative abstractions, document important assumptions, and do not silently introduce major technologies.
 
