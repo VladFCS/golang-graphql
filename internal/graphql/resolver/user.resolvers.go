@@ -14,6 +14,25 @@ import (
 	"github.com/vladfc/ghira/internal/user"
 )
 
+// CreateUser is the resolver for the createUser field.
+func (r *mutationResolver) CreateUser(ctx context.Context, input model.CreateUserInput) (*model.User, error) {
+	createdUser, err := r.UserService.CreateUser(ctx, user.CreateUserInput{
+		Email:    input.Email,
+		Username: input.Username,
+		Password: input.Password,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return mapper.UserToGraphQL(*createdUser), nil
+}
+
+// Empty is the resolver for the _empty field.
+func (r *mutationResolver) Empty(ctx context.Context) (*bool, error) {
+	return nil, nil
+}
+
 // Users is the resolver for the users field.
 func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 	users, err := r.UserService.GetUsers(ctx)

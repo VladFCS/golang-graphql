@@ -6,8 +6,17 @@ import (
 	"time"
 )
 
+type CreateUserInput struct {
+	Email    string `json:"email"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
 type Health struct {
 	Status string `json:"status"`
+}
+
+type Mutation struct {
 }
 
 type Query struct {

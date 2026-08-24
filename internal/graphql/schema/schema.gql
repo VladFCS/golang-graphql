@@ -3,3 +3,7 @@ scalar Time
 type Query {
   health: Health!
 }
+
+type Mutation {
+  _empty: Boolean
+}
