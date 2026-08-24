@@ -4,7 +4,7 @@ DATABASE_URL ?= postgres://postgres:postgres@localhost:5432/qhira?sslmode=disabl
 JWT_SECRET ?= change-me-in-development
 LOG_LEVEL ?= info
 
-.PHONY: run test fmt gqlgen migrate-up migrate-down migrate-status goose-create
+.PHONY: run test fmt gqlgen sqlc migrate-up migrate-down migrate-status goose-create
 
 run:
 	APP_ENV=$(APP_ENV) HTTP_ADDR=$(HTTP_ADDR) DATABASE_URL=$(DATABASE_URL) JWT_SECRET=$(JWT_SECRET) LOG_LEVEL=$(LOG_LEVEL) go run ./cmd/api
@@ -17,6 +17,9 @@ fmt:
 
 gqlgen:
 	go run github.com/99designs/gqlgen generate
+
+sqlc:
+	go run github.com/sqlc-dev/sqlc/cmd/sqlc generate
 
 migrate-up:
 	goose -dir migrations postgres "$(DATABASE_URL)" up

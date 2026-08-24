@@ -1,0 +1,16 @@
+version: "2"
+sql:
+  - engine: "postgresql"
+    schema: "migrations"
+    queries: "internal/database/queries"
+    gen:
+      go:
+        package: "db"
+        out: "internal/database/db"
+        sql_package: "database/sql"
+        emit_empty_slices: true
+        overrides:
+          - db_type: "uuid"
+            go_type: "string"
+          - db_type: "pg_catalog.uuid"
+            go_type: "string"
