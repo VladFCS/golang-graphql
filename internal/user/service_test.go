@@ -5,6 +5,8 @@ import (
 	"errors"
 	"testing"
 	"time"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 type mockRepository struct {
@@ -137,6 +139,152 @@ func TestServiceGetUserByIDReturnsRepositoryError(t *testing.T) {
 
 	if user != nil {
 		t.Fatalf("expected nil user on error, got %+v", user)
+	}
+}
+
+func TestServiceCreateUser(t *testing.T) {
+	t.Parallel()
+
+	expectedUser := newTestUser("8b7d8a0a-6c7e-4bb2-bb6a-68c73a4b6b01", "ira.bondar@example.com", "ira")
+	repo := &mockRepository{
+		createResult: &expectedUser,
+	}
+	service := NewService(repo)
+
+	user, err := service.CreateUser(context.Background(), CreateUserInput{
+		Email:    " ira.bondar@example.com ",
+		Username: " ira ",
+		Password: "secret123",
+	})
+	if err != nil {
+		t.Fatalf("CreateUser returned error: %v", err)
+	}
+
+	if !repo.createCalled {
+		t.Fatal("expected repository Create to be called")
+	}
+
+	if repo.createUser.Email != "ira.bondar@example.com" {
+		t.Fatalf("expected repository user email to be trimmed, got %q", repo.createUser.Email)
+	}
+
+	if repo.createUser.Username != "ira" {
+		t.Fatalf("expected repository user username to be trimmed, got %q", repo.createUser.Username)
+	}
+
+	if repo.createUser.PasswordHash == "" {
+		t.Fatal("expected repository user password hash to be set")
+	}
+
+	if repo.createUser.PasswordHash == "secret123" {
+		t.Fatal("expected repository user password to be hashed")
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(repo.createUser.PasswordHash), []byte("secret123")); err != nil {
+		t.Fatalf("expected repository user password hash to match password: %v", err)
+	}
+
+	if user == nil {
+		t.Fatal("expected created user, got nil")
+	}
+
+	if *user != expectedUser {
+		t.Fatalf("expected created user %+v, got %+v", expectedUser, *user)
+	}
+}
+
+func TestServiceCreateUserRequiresEmail(t *testing.T) {
+	t.Parallel()
+
+	repo := &mockRepository{}
+	service := NewService(repo)
+
+	user, err := service.CreateUser(context.Background(), CreateUserInput{
+		Email:    " ",
+		Username: "ira",
+		Password: "secret123",
+	})
+	if !errors.Is(err, ErrEmailMustPresent) {
+		t.Fatalf("expected error %v, got %v", ErrEmailMustPresent, err)
+	}
+
+	if user != nil {
+		t.Fatalf("expected nil user, got %+v", user)
+	}
+
+	if repo.createCalled {
+		t.Fatal("expected repository Create not to be called")
+	}
+}
+
+func TestServiceCreateUserRequiresUsername(t *testing.T) {
+	t.Parallel()
+
+	repo := &mockRepository{}
+	service := NewService(repo)
+
+	user, err := service.CreateUser(context.Background(), CreateUserInput{
+		Email:    "ira.bondar@example.com",
+		Username: " ",
+		Password: "secret123",
+	})
+	if !errors.Is(err, ErrUsernameMustPresent) {
+		t.Fatalf("expected error %v, got %v", ErrUsernameMustPresent, err)
+	}
+
+	if user != nil {
+		t.Fatalf("expected nil user, got %+v", user)
+	}
+
+	if repo.createCalled {
+		t.Fatal("expected repository Create not to be called")
+	}
+}
+
+func TestServiceCreateUserRequiresPassword(t *testing.T) {
+	t.Parallel()
+
+	repo := &mockRepository{}
+	service := NewService(repo)
+
+	user, err := service.CreateUser(context.Background(), CreateUserInput{
+		Email:    "ira.bondar@example.com",
+		Username: "ira",
+		Password: " ",
+	})
+	if !errors.Is(err, ErrPasswordMustPresent) {
+		t.Fatalf("expected error %v, got %v", ErrPasswordMustPresent, err)
+	}
+
+	if user != nil {
+		t.Fatalf("expected nil user, got %+v", user)
+	}
+
+	if repo.createCalled {
+		t.Fatal("expected repository Create not to be called")
+	}
+}
+
+func TestServiceCreateUserReturnsRepositoryError(t *testing.T) {
+	t.Parallel()
+
+	expectedErr := errors.New("create user failed")
+	repo := &mockRepository{
+		createErr: expectedErr,
+	}
+	service := NewService(repo)
+
+	user, err := service.CreateUser(context.Background(), CreateUserInput{
+		Email:    "ira.bondar@example.com",
+		Username: "ira",
+		Password: "secret123",
+	})
+	if !errors.Is(err, expectedErr) {
+		t.Fatalf("expected error %v, got %v", expectedErr, err)
+	}
+
+	if user != nil {
+		t.Fatalf("expected nil user, got %+v", user)
 	}
 }
 

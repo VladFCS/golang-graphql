@@ -10,3 +10,9 @@ type User struct {
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 }
+
+type CreateUserInput struct {
+	Email    string
+	Username string
+	Password string
+}
