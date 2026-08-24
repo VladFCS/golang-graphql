@@ -7,9 +7,11 @@ package resolver
 
 import (
 	"context"
+	"errors"
 
 	"github.com/vladfc/ghira/internal/graphql/mapper"
 	"github.com/vladfc/ghira/internal/graphql/model"
+	"github.com/vladfc/ghira/internal/user"
 )
 
 // Users is the resolver for the users field.
@@ -24,9 +26,17 @@ func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 
 // User is the resolver for the user field.
 func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error) {
-	user, err := r.UserService.GetUserByID(ctx, id)
+	foundUser, err := r.UserService.GetUserByID(ctx, id)
 	if err != nil {
+		if errors.Is(err, user.ErrNotFound) {
+			return nil, nil
+		}
 		return nil, err
 	}
-	return mapper.UserToGraphQL(user), nil
+
+	if foundUser == nil {
+		return nil, nil
+	}
+
+	return mapper.UserToGraphQL(*foundUser), nil
 }

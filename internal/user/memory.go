@@ -26,17 +26,17 @@ func (m *MemoryRepository) List(_ context.Context) ([]User, error) {
 	return append([]User(nil), m.users...), nil
 }
 
-func (m *MemoryRepository) FindByID(_ context.Context, id string) (User, error) {
+func (m *MemoryRepository) FindByID(_ context.Context, id string) (*User, error) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
 	for _, candidate := range m.users {
 		if candidate.ID == id {
-			return candidate, nil
+			return &candidate, nil
 		}
 	}
 
-	return User{}, ErrNotFound
+	return &User{}, ErrNotFound
 }
 
 var _ Repository = (*MemoryRepository)(nil)

@@ -16,6 +16,6 @@ func (s *Service) GetUsers(ctx context.Context) ([]User, error) {
 	return s.repository.List(ctx)
 }
 
-func (s *Service) GetUserByID(ctx context.Context, id string) (User, error) {
+func (s *Service) GetUserByID(ctx context.Context, id string) (*User, error) {
 	return s.repository.FindByID(ctx, id)
 }
